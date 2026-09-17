@@ -1,0 +1,2 @@
+ALTER TABLE public.profile_preferences DROP CONSTRAINT IF EXISTS profile_preferences_distance_check;
+ALTER TABLE public.profile_preferences ADD CONSTRAINT profile_preferences_distance_check CHECK (max_distance_km IS NULL OR max_distance_km >= 0);
