@@ -2,8 +2,9 @@
  * Presentation pieces for interest, mutual connections and the pre-chat
  * introduction. Every number and sentence comes from the matching engine.
  */
-import { Link, useRouterState } from "@tanstack/react-router";
-import { ArrowLeft, Compass, Heart, UserRound } from "lucide-react";
+import { useState } from "react";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { ArrowLeft, Compass, Heart, MessageSquare, UserRound } from "lucide-react";
 
 import type { PublicConnection } from "@/lib/matching/connections";
 import type { PublicMatch } from "@/lib/matching/types";
@@ -32,6 +33,7 @@ import { cn } from "@/lib/utils";
 const NAV = [
   { to: "/home", label: "Discover", icon: Compass },
   { to: "/connections", label: "Connections", icon: Heart },
+  { to: "/messages", label: "Messages", icon: MessageSquare },
   { to: "/profile", label: "Profile", icon: UserRound },
 ] as const;
 
@@ -206,7 +208,7 @@ export function ConnectionsList({
   );
 }
 
-/** Pre-chat introduction screen. Messaging itself is not built yet. */
+/** Pre-chat introduction screen with live messaging access. */
 export function ConnectionDetail({
   connection,
   onBack,
@@ -218,6 +220,22 @@ export function ConnectionDetail({
   onUnmatch: () => void;
   pending?: boolean;
 }) {
+  const navigate = useNavigate();
+  const [startingChat, setStartingChat] = useState(false);
+
+  const handleStartConversation = async () => {
+    setStartingChat(true);
+    try {
+      const { getOrCreateConversation } = await import("@/lib/messaging.functions");
+      const { useServerFn } = await import("@tanstack/react-start");
+      // Use direct server function call.
+      const result = await getOrCreateConversation({ data: { matchId: connection.matchId } });
+      navigate({ to: "/messages/$conversationId", params: { conversationId: result.id } });
+    } catch (error) {
+      console.error("Failed to start conversation:", error);
+      setStartingChat(false);
+    }
+  };
   return (
     <article className="motion-safe:animate-step-in">
       <Button
@@ -279,8 +297,9 @@ export function ConnectionDetail({
         )}
 
         <div className="mt-8 grid gap-3">
-          <PrimaryButton disabled>Start conversation →</PrimaryButton>
-          <p className="text-center text-[13px] text-muted-foreground">Messaging is coming next.</p>
+          <PrimaryButton onClick={handleStartConversation} disabled={startingChat}>
+            {startingChat ? "Opening…" : "Start conversation →"}
+          </PrimaryButton>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button
