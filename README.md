@@ -13,17 +13,8 @@ Kindred is a full-stack dating application designed around intentional connectio
 - **Mutual Connections**: Connection state management with mutual interest verification, conversation starter prompts, and unmatch controls.
 - **Secure Persistence**: Supabase PostgreSQL backend with Row Level Security (RLS) enforcing complete member data isolation.
 
-## Tech Stack
 
-- **Framework**: [TanStack Start](https://tanstack.com/start) with full-stack SSR and server functions
-- **Frontend**: [React 19](https://react.dev/), [TypeScript](https://www.typescriptlang.org/)
-- **Routing & State**: [TanStack Router](https://tanstack.com/router), [TanStack Query](https://tanstack.com/query)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) with custom design tokens
-- **UI Primitives**: Radix UI, Lucide Icons, Sonner toasts
-- **Database & Auth**: [Supabase](https://supabase.com/) (PostgreSQL with RLS, GoTrue Auth)
-- **Build Tool**: [Vite](https://vite.dev/)
 
-## Getting Started
 
 ### Prerequisites
 
