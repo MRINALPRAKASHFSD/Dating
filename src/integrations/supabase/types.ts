@@ -14,6 +14,98 @@ export type Database = {
   }
   public: {
     Tables: {
+      conversation_prompt_usage: {
+        Row: {
+          id: string
+          conversation_id: string
+          prompt_id: string
+          used_at: string
+        }
+        Insert: {
+          id?: string
+          conversation_id: string
+          prompt_id: string
+          used_at?: string
+        }
+        Update: {
+          id?: string
+          conversation_id?: string
+          prompt_id?: string
+          used_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_prompt_usage_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversation_prompt_usage_prompt_id_fkey"
+            columns: ["prompt_id"]
+            isOneToOne: false
+            referencedRelation: "deep_talk_prompts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          id: string
+          match_id: string
+          phase: string
+          last_message_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          match_id: string
+          phase?: string
+          last_message_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          match_id?: string
+          phase?: string
+          last_message_at?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: true
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deep_talk_prompts: {
+        Row: {
+          id: string
+          category: string
+          prompt_text: string
+          depth_level: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          category: string
+          prompt_text: string
+          depth_level?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          category?: string
+          prompt_text?: string
+          depth_level?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
       hobbies: {
         Row: {
           category: string
@@ -79,6 +171,61 @@ export type Database = {
             columns: ["profile_b_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          id: string
+          conversation_id: string
+          sender_id: string
+          content: string
+          message_type: string
+          deep_talk_prompt_id: string | null
+          read_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          conversation_id: string
+          sender_id: string
+          content: string
+          message_type?: string
+          deep_talk_prompt_id?: string | null
+          read_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          conversation_id?: string
+          sender_id?: string
+          content?: string
+          message_type?: string
+          deep_talk_prompt_id?: string | null
+          read_at?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_deep_talk_prompt_id_fkey"
+            columns: ["deep_talk_prompt_id"]
+            isOneToOne: false
+            referencedRelation: "deep_talk_prompts"
             referencedColumns: ["id"]
           },
         ]
