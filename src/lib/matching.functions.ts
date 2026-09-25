@@ -47,6 +47,11 @@ export const recordInterest = createServerFn({ method: "POST" })
         throw new Error("You can't express interest in yourself.");
       }
 
+      const { isBlockedPair } = await import("@/lib/safety/safety.server");
+      if (await isBlockedPair(context.userId, data.toProfileId)) {
+        throw new Error("Cannot interact with this profile.");
+      }
+
       const { error } = await context.supabase.from("profile_interests").upsert(
         {
           from_profile_id: context.userId,

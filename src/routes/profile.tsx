@@ -10,6 +10,9 @@ import { RequireAuth } from "@/components/kindred/require-auth";
 import { useOnboarding } from "@/context/onboarding-context";
 import { completeOnboarding } from "@/lib/kindred-db";
 import { cn } from "@/lib/utils";
+import { KindredHeader } from "@/components/kindred/kindred-header";
+import { KindredNav } from "@/components/kindred/connection-ui";
+import { BlockedMembersSettings } from "@/components/kindred/safety-dialogs";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({ meta: [
@@ -24,6 +27,7 @@ function Profile() {
   const { state, updateState, persist, saving } = useOnboarding();
   const [complete, setComplete] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"profile" | "privacy">("profile");
   const fileInput = useRef<HTMLInputElement>(null);
 
   const finish = async () => {
@@ -54,6 +58,73 @@ function Profile() {
           </p>
         </div>
       </OnboardingShell>
+    );
+  }
+
+  if (state.onboardingCompleted && !complete) {
+    return (
+      <main className="min-h-dvh bg-background">
+        <div className="mx-auto w-full max-w-lg border-x border-border/10 px-6 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-[max(1.5rem,env(safe-area-inset-top))] md:max-w-3xl">
+          <KindredHeader />
+          <KindredNav />
+
+          <div className="mt-8 flex gap-2 border-b border-border/60 pb-3">
+            <button
+              type="button"
+              onClick={() => setActiveTab("profile")}
+              className={cn(
+                "rounded-lg px-3 py-1.5 text-[14px] font-medium transition-colors",
+                activeTab === "profile"
+                  ? "bg-accent/15 font-semibold text-accent"
+                  : "text-muted-foreground hover:text-primary",
+              )}
+            >
+              Your Profile
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("privacy")}
+              className={cn(
+                "rounded-lg px-3 py-1.5 text-[14px] font-medium transition-colors",
+                activeTab === "privacy"
+                  ? "bg-accent/15 font-semibold text-accent"
+                  : "text-muted-foreground hover:text-primary",
+              )}
+            >
+              Privacy & Safety
+            </button>
+          </div>
+
+          <div className="mt-6">
+            {activeTab === "profile" ? (
+              <div className="space-y-6">
+                <div>
+                  <h1 className="font-display text-3xl tracking-tight text-primary">
+                    Your profile
+                  </h1>
+                  <p className="mt-1 text-[15px] text-muted-foreground">
+                    This is how other members see you across Kindred.
+                  </p>
+                </div>
+                <ProfilePreview state={state} />
+                <div className="pt-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate({ to: "/details" })}
+                    className="h-11 rounded-xl text-[14px] font-medium"
+                  >
+                    Edit profile details
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="py-2">
+                <BlockedMembersSettings />
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
     );
   }
 

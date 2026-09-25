@@ -48,6 +48,13 @@ async function verifyConversationAccess(
     throw new Error("Unauthorized.");
   }
 
+  // Reject access if either participant has blocked the other.
+  const partnerId = match.profile_a_id === userId ? match.profile_b_id : match.profile_a_id;
+  const { isBlockedPair } = await import("@/lib/safety/safety.server");
+  if (await isBlockedPair(userId, partnerId)) {
+    throw new Error("This connection is no longer active.");
+  }
+
   return { conversation: conv, match };
 }
 
@@ -73,6 +80,13 @@ export async function getOrCreateConversation(
   if (match.status !== "active") throw new Error("This connection has ended.");
   if (match.profile_a_id !== userId && match.profile_b_id !== userId) {
     throw new Error("Unauthorized.");
+  }
+
+  // Reject conversation creation if either participant has blocked the other.
+  const partnerId = match.profile_a_id === userId ? match.profile_b_id : match.profile_a_id;
+  const { isBlockedPair } = await import("@/lib/safety/safety.server");
+  if (await isBlockedPair(userId, partnerId)) {
+    throw new Error("This connection is no longer active.");
   }
 
   // Try to find existing conversation.
@@ -183,11 +197,15 @@ export async function getConversationsFor(userId: string): Promise<ConversationS
     unreadByConv.set(row.conversation_id, (unreadByConv.get(row.conversation_id) ?? 0) + 1);
   }
 
+  const { getBlockedUserIds } = await import("@/lib/safety/safety.server");
+  const blockedUserIds = await getBlockedUserIds(userId);
+
   const summaries: ConversationSummary[] = [];
   for (const conv of conversations) {
     const match = matchById.get(conv.match_id);
     if (!match) continue;
     const partnerId = match.profile_a_id === userId ? match.profile_b_id : match.profile_a_id;
+    if (blockedUserIds.has(partnerId)) continue;
     const partner = profileById.get(partnerId);
     if (!partner) continue;
 

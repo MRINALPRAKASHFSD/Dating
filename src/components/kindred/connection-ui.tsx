@@ -17,6 +17,7 @@ import {
 } from "@/components/kindred/match-ui";
 import { PrimaryButton, SecondaryButton } from "@/components/kindred/onboarding-ui";
 import { Button } from "@/components/ui/button";
+import { BlockConfirmationDialog, ReportUserDialog } from "./safety-dialogs";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -222,6 +223,8 @@ export function ConnectionDetail({
 }) {
   const navigate = useNavigate();
   const [startingChat, setStartingChat] = useState(false);
+  const [showBlockDialog, setShowBlockDialog] = useState(false);
+  const [showReportDialog, setShowReportDialog] = useState(false);
 
   const handleStartConversation = async () => {
     setStartingChat(true);
@@ -300,33 +303,79 @@ export function ConnectionDetail({
           <PrimaryButton onClick={handleStartConversation} disabled={startingChat}>
             {startingChat ? "Opening…" : "Start conversation →"}
           </PrimaryButton>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                disabled={pending}
-                className="h-11 text-[13px] font-medium text-muted-foreground hover:bg-transparent hover:text-primary"
-              >
-                Unmatch
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle className="font-display tracking-tight">
-                  Unmatch from {connection.firstName}?
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  Your connection will be removed and you won't be able to message each other.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Keep connection</AlertDialogCancel>
-                <AlertDialogAction onClick={onUnmatch}>Unmatch</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <div className="flex items-center justify-center gap-3 pt-1">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  disabled={pending}
+                  className="h-8 px-2 text-[13px] font-medium text-muted-foreground hover:bg-transparent hover:text-primary"
+                >
+                  Unmatch
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="font-display tracking-tight">
+                    Unmatch from {connection.firstName}?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Your connection will be removed and you won't be able to message each other.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Keep connection</AlertDialogCancel>
+                  <AlertDialogAction onClick={onUnmatch}>Unmatch</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
+            <span className="text-border/60">·</span>
+
+            <Button
+              type="button"
+              variant="ghost"
+              disabled={pending}
+              onClick={() => setShowBlockDialog(true)}
+              className="h-8 px-2 text-[13px] font-medium text-muted-foreground hover:bg-transparent hover:text-primary"
+            >
+              Block
+            </Button>
+
+            <span className="text-border/60">·</span>
+
+            <Button
+              type="button"
+              variant="ghost"
+              disabled={pending}
+              onClick={() => setShowReportDialog(true)}
+              className="h-8 px-2 text-[13px] font-medium text-muted-foreground hover:bg-transparent hover:text-primary"
+            >
+              Report
+            </Button>
+          </div>
         </div>
+
+        <BlockConfirmationDialog
+          open={showBlockDialog}
+          onOpenChange={setShowBlockDialog}
+          targetUserId={connection.profileId}
+          targetName={connection.firstName}
+          onBlocked={onBack}
+        />
+
+        <ReportUserDialog
+          open={showReportDialog}
+          onOpenChange={setShowReportDialog}
+          reportedUserId={connection.profileId}
+          reportedName={connection.firstName}
+          onReported={(alsoBlocked) => {
+            if (alsoBlocked) {
+              onBack();
+            }
+          }}
+        />
       </div>
     </article>
   );
