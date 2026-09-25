@@ -143,8 +143,9 @@ export async function getCompatibleMatchesFor(
   offset = 0,
 ): Promise<PublicMatch[]> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { getBlockedUserIds } = await import("@/lib/safety/safety.server");
 
-  const [candidates, decisionsResult, matchesResult] = await Promise.all([
+  const [candidates, decisionsResult, matchesResult, blockedUserIds] = await Promise.all([
     loadCandidates(),
     supabaseAdmin
       .from("profile_interests")
@@ -156,6 +157,7 @@ export async function getCompatibleMatchesFor(
       .select("profile_a_id, profile_b_id, status")
       .or(`profile_a_id.eq.${userId},profile_b_id.eq.${userId}`)
       .eq("status", "active"),
+    getBlockedUserIds(userId),
   ]);
   if (decisionsResult.error) throw decisionsResult.error;
   if (matchesResult.error) throw matchesResult.error;
@@ -169,6 +171,10 @@ export async function getCompatibleMatchesFor(
   // Active connections never reappear in discovery.
   for (const row of matchesResult.data ?? []) {
     decided.add(row.profile_a_id === userId ? row.profile_b_id : row.profile_a_id);
+  }
+  // Blocked users in either direction never appear in discovery.
+  for (const blockedId of blockedUserIds) {
+    decided.add(blockedId);
   }
 
   const pool = candidates.filter((candidate) => !decided.has(candidate.profileId));
