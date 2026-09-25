@@ -24,8 +24,8 @@ import {
   LoadEarlierButton,
   ChatSkeleton,
   ChatError,
-  ReportBlockMenu,
 } from "./chat-ui";
+import { BlockConfirmationDialog, ReportUserDialog } from "./safety-dialogs";
 import { useConversation } from "@/hooks/use-conversation";
 import { useAuth } from "@/context/auth-context";
 import type { ChatPartner } from "@/lib/messaging/types";
@@ -47,6 +47,8 @@ export function ChatScreen({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showDeepTalk, setShowDeepTalk] = useState(false);
+  const [showBlockDialog, setShowBlockDialog] = useState(false);
+  const [showReportDialog, setShowReportDialog] = useState(false);
 
   const conversation = useConversation(conversationId);
 
@@ -125,12 +127,18 @@ export function ChatScreen({
               <MoreVertical className="size-4.5" aria-hidden="true" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuContent align="end" className="w-52">
             <DropdownMenuItem onSelect={() => navigate({ to: "/connections" })}>
               View connection
             </DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive">
-              <ReportBlockMenu firstName={partner.firstName} />
+            <DropdownMenuItem onSelect={() => setShowReportDialog(true)}>
+              Report {partner.firstName}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={() => setShowBlockDialog(true)}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              Block {partner.firstName}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -204,6 +212,27 @@ export function ChatScreen({
       ) : (
         <ConnectionEndedBanner />
       )}
+
+      {/* ── Safety & Privacy Dialogs ───────────────────────────────────── */}
+      <BlockConfirmationDialog
+        open={showBlockDialog}
+        onOpenChange={setShowBlockDialog}
+        targetUserId={partner.profileId}
+        targetName={partner.firstName}
+        onBlocked={() => navigate({ to: "/messages" })}
+      />
+      <ReportUserDialog
+        open={showReportDialog}
+        onOpenChange={setShowReportDialog}
+        reportedUserId={partner.profileId}
+        reportedName={partner.firstName}
+        conversationId={conversationId}
+        onReported={(alsoBlocked) => {
+          if (alsoBlocked) {
+            navigate({ to: "/messages" });
+          }
+        }}
+      />
     </div>
   );
 }
