@@ -378,35 +378,3 @@ export function ChatError({ onRetry }: { onRetry: () => void }) {
   );
 }
 
-// ── Report / Block Placeholder ──────────────────────────────────────────
-
-export function ReportBlockMenu({ firstName }: { firstName: string }) {
-  const [showReport, setShowReport] = useState(false);
-
-  return (
-    <>
-      <button
-        type="button"
-        onClick={() => setShowReport(true)}
-        className="text-[12px] text-muted-foreground hover:text-destructive"
-      >
-        Report or block
-      </button>
-      {showReport && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-sm rounded-2xl bg-background p-6">
-            <h3 className="font-display text-xl tracking-tight text-primary">
-              Report {firstName}?
-            </h3>
-            <p className="mt-2 text-[14px] leading-relaxed text-muted-foreground">
-              Reporting and blocking features are being finalized. This action is not yet available.
-            </p>
-            <Button onClick={() => setShowReport(false)} className="mt-4 w-full h-11 rounded-xl">
-              Close
-            </Button>
-          </div>
-        </div>
-      )}
-    </>
-  );
-}
