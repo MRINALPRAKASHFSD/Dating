@@ -31,6 +31,8 @@ export async function createMatchIfMutual(
   otherProfileId: string,
 ): Promise<string | null> {
   if (userId === otherProfileId) return null;
+  const { isBlockedPair } = await import("@/lib/safety/safety.server");
+  if (await isBlockedPair(userId, otherProfileId)) return null;
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
   const [{ data: outgoing }, { data: reciprocal }] = await Promise.all([
@@ -86,6 +88,8 @@ export async function createMatchIfMutual(
 /** Active connections for a member, with compatibility recomputed by the engine. */
 export async function getConnectionsFor(userId: string): Promise<PublicConnection[]> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { getBlockedUserIds } = await import("@/lib/safety/safety.server");
+  const blockedUserIds = await getBlockedUserIds(userId);
 
   const { data: matches, error } = await supabaseAdmin
     .from("matches")
@@ -95,7 +99,10 @@ export async function getConnectionsFor(userId: string): Promise<PublicConnectio
     .order("created_at", { ascending: false });
   if (error) throw error;
 
-  const rows = (matches ?? []) as MatchRow[];
+  const rows = ((matches ?? []) as MatchRow[]).filter((row) => {
+    const partnerId = row.profile_a_id === userId ? row.profile_b_id : row.profile_a_id;
+    return !blockedUserIds.has(partnerId);
+  });
   if (rows.length === 0) return [];
 
   const partnerIds = rows.map((row) =>
