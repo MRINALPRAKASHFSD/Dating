@@ -499,6 +499,97 @@ export type Database = {
         }
         Relationships: []
       }
+      user_blocks: {
+        Row: {
+          id: string
+          blocker_id: string
+          blocked_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          blocker_id: string
+          blocked_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          blocker_id?: string
+          blocked_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_blocks_blocker_id_fkey"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_blocks_blocked_id_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_reports: {
+        Row: {
+          id: string
+          reporter_id: string
+          reported_user_id: string
+          conversation_id: string | null
+          reason: string
+          description: string | null
+          status: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          reporter_id: string
+          reported_user_id: string
+          conversation_id?: string | null
+          reason: string
+          description?: string | null
+          status?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          reporter_id?: string
+          reported_user_id?: string
+          conversation_id?: string | null
+          reason?: string
+          description?: string | null
+          status?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_reports_reported_user_id_fkey"
+            columns: ["reported_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_reports_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
